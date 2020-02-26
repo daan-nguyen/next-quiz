@@ -7,5 +7,6 @@ type Users = {
 
 type Result = {
   id: string;
+  name: string;
   time: number;
 };

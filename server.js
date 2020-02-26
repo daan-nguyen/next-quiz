@@ -22,6 +22,7 @@ io.on("connection", socket => {
   socket.on("buzz", () => {
     results.push({
       id: socket.id,
+      name: users[socket.id],
       time: new Date().getTime()
     });
 
