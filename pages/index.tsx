@@ -18,10 +18,12 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
     };
   }, []);
 
-  const joinHandler = (value: string) => {
-    if (value) {
-      socketRef.current?.emit("join-room", value);
-      setUsername(value);
+  const joinHandler = (name: string) => {
+    const cleanName = name.trim();
+
+    if (cleanName) {
+      socketRef.current?.emit("join-room", cleanName);
+      setUsername(cleanName);
     }
   };
 
@@ -43,7 +45,7 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
       ) : (
         <Card style={{ width: 400, textAlign: "center" }} title="Get ready...">
           <Button
-            style={{ height: 300, width: 300 }}
+            style={{ height: 300, width: 300, fontSize: "60px" }}
             type="danger"
             onClick={buzzHandler}
           >

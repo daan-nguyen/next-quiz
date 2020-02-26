@@ -1,7 +1,7 @@
 let baseUrl = (env => {
   switch (env) {
     case "production":
-      return "http://n1trivia.herokuapp.com";
+      return "https://n1trivia.herokuapp.com";
     default:
       return "http://localhost:3000";
   }
