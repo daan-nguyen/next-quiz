@@ -9,13 +9,9 @@ import Container from "../components/Container";
 const Home: NextPage<{ messages: [] }> = ({ messages }) => {
   const socketRef = useRef<SocketIOClient.Socket>();
   const [username, setUsername] = useState<string>();
-  const [users, setUsers] = useState<Object>({});
-  const [buzzed, setBuzzed] = useState<boolean>(true);
 
   useEffect(() => {
     socketRef.current = io(`${BASE_URL}`);
-    socketRef.current.on("users", (users: Object) => setUsers(users));
-    socketRef.current.on("clear", () => setBuzzed(false));
 
     return () => {
       socketRef.current?.close();
@@ -31,7 +27,6 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
 
   const buzzHandler = () => {
     socketRef.current?.emit("buzz");
-    setBuzzed(true);
   };
 
   return (
@@ -46,15 +41,11 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
           />
         </Card>
       ) : (
-        <Card
-          style={{ width: 400, textAlign: "center" }}
-          title={!buzzed ? "Get ready..." : "Waiting for next question"}
-        >
+        <Card style={{ width: 400, textAlign: "center" }} title="Get ready...">
           <Button
             style={{ height: 300, width: 300 }}
             type="danger"
             onClick={buzzHandler}
-            disabled={buzzed}
           >
             BUZZ
           </Button>

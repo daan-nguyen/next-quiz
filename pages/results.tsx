@@ -6,22 +6,14 @@ import { BASE_URL } from "../utils/env";
 import fetch from "isomorphic-unfetch";
 import { Timeline } from "antd";
 
-type Result = {
-  id: string;
-  time: number;
-};
-
-type Users = {
-  [key: string]: string;
-};
-
-const Results: NextPage<{ initUsers: Users }> = ({ initUsers }) => {
+const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
   const socketRef = useRef<SocketIOClient.Socket>();
   const [users, setUsers] = useState<Users>({});
   const [results, setResults] = useState<Array<Result>>([]);
 
   useEffect(() => {
-    setUsers(initUsers);
+    setUsers(props.users);
+    setResults(props.results);
 
     socketRef.current = io(`${BASE_URL}`);
     socketRef.current.on("users", (users: Users) => setUsers(users));
@@ -37,20 +29,30 @@ const Results: NextPage<{ initUsers: Users }> = ({ initUsers }) => {
   return (
     <Container>
       <h2>Players: {Object.keys(users).length}</h2>
-      <Timeline pending="Waiting...">
-        {results.map((result, i) => (
-          <Timeline.Item>{users[result.id]}</Timeline.Item>
-        ))}
+      <Timeline pending="Waiting..." style={{ width: 400, textAlign: "left" }}>
+        {results.map((result, i) => {
+          let time = 0;
+
+          if (i > 0) {
+            time = result.time - results[0].time;
+          }
+
+          return (
+            <Timeline.Item>
+              <strong>{users[result.id]}</strong> <em>+{time}ms</em>
+            </Timeline.Item>
+          );
+        })}
       </Timeline>
     </Container>
   );
 };
 
 Results.getInitialProps = async ({ req }) => {
-  const res = await fetch(`${BASE_URL}/users`);
-  const initUsers = await res.json();
+  const res = await fetch(`${BASE_URL}/state`);
+  const state = await res.json();
 
-  return { initUsers };
+  return state;
 };
 
 export default Results;

@@ -9,31 +9,28 @@ const nextHandler = nextApp.getRequestHandler();
 
 let port = process.env.PORT || 3000;
 
-const ROOM = "buzzer-room";
-
 const users = {};
-let buzzers = [];
+let results = [];
 
 // socket.io server
 io.on("connection", socket => {
   socket.on("join-room", name => {
-    socket.join(ROOM);
     users[socket.id] = name;
     io.emit("users", users);
   });
 
   socket.on("buzz", () => {
-    buzzers.push({
+    results.push({
       id: socket.id,
       time: new Date().getTime()
     });
 
-    io.emit("update-results", buzzers);
+    io.emit("update-results", results);
   });
 
   socket.on("clear", () => {
-    buzzers = [];
-    socket.broadcast.emit("clear");
+    results = [];
+    socket.broadcast.emit("update-results", results);
   });
 
   socket.on("disconnect", () => {
@@ -43,12 +40,11 @@ io.on("connection", socket => {
 });
 
 nextApp.prepare().then(() => {
-  // app.get("/messages", (req, res) => {
-  //   res.json(messages);
-  // });
-
-  app.get("/users", (req, res) => {
-    res.json(users);
+  app.get("/state", (req, res) => {
+    res.json({
+      users,
+      results
+    });
   });
 
   app.get("*", (req, res) => {
