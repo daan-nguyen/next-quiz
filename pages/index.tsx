@@ -1,34 +1,24 @@
 import { NextPage } from "next";
-import fetch from "isomorphic-unfetch";
-import io from "socket.io-client";
-import { BASE_URL } from "../utils/env";
-import { useEffect, useRef, useState, ChangeEvent } from "react";
+import { useState } from "react";
 import { Card, Button, Input } from "antd";
 import Container from "../components/Container";
+import useSocket from "../utils/useSocket";
 
 const Home: NextPage<{ messages: [] }> = ({ messages }) => {
-  const socketRef = useRef<SocketIOClient.Socket>();
+  const socket = useSocket();
   const [username, setUsername] = useState<string>();
-
-  useEffect(() => {
-    socketRef.current = io(`${BASE_URL}`);
-
-    return () => {
-      socketRef.current?.close();
-    };
-  }, []);
 
   const joinHandler = (name: string) => {
     const cleanName = name.trim();
 
-    if (cleanName) {
-      socketRef.current?.emit("join-room", cleanName);
+    if (cleanName && socket) {
+      socket.emit("join-room", cleanName);
       setUsername(cleanName);
     }
   };
 
   const buzzHandler = () => {
-    socketRef.current?.emit("buzz");
+    socket?.emit("buzz");
   };
 
   return (

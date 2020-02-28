@@ -1,15 +1,15 @@
 import { NextPage } from "next";
 import Container from "../components/Container";
-import io from "socket.io-client";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/env";
 import fetch from "isomorphic-unfetch";
 import { Timeline } from "antd";
+import useSocket from "../utils/useSocket";
 
 const COLORS = ["#a0d911", "#fadb14", "#faad14"];
 
 const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
-  const socketRef = useRef<SocketIOClient.Socket>();
+  const socket = useSocket();
   const [users, setUsers] = useState<Users>({});
   const [results, setResults] = useState<Array<Result>>([]);
   const userCount = Object.keys(users).length;
@@ -17,17 +17,18 @@ const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
   useEffect(() => {
     setUsers(props.users);
     setResults(props.results);
+  }, []);
 
-    socketRef.current = io(`${BASE_URL}`);
-    socketRef.current.on("users", (users: Users) => setUsers(users));
-    socketRef.current.on("update-results", (results: Array<Result>) => {
+  useEffect(() => {
+    socket?.on("users", (users: Users) => setUsers(users));
+    socket?.on("update-results", (results: Array<Result>) => {
       setResults(results);
     });
 
     return () => {
-      socketRef.current?.close();
+      socket?.close();
     };
-  }, []);
+  }, [socket]);
 
   return (
     <Container>

@@ -1,27 +1,24 @@
 import { NextPage } from "next";
 import { Card, Button } from "antd";
 import Container from "../components/Container";
-import io from "socket.io-client";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/env";
+import useSocket from "../utils/useSocket";
 
 const Admin: NextPage<{ users: Users }> = props => {
-  const socketRef = useRef<SocketIOClient.Socket>();
+  const socket = useSocket();
   const [users, setUsers] = useState<{}>({});
 
   useEffect(() => {
-    socketRef.current = io(`${BASE_URL}`);
-    socketRef.current.on("users", (users: Object) => setUsers(users));
-
     setUsers(props.users);
-
-    return () => {
-      socketRef.current?.close();
-    };
   }, []);
 
+  useEffect(() => {
+    socket?.on("users", (users: Object) => setUsers(users));
+  }, [socket]);
+
   const handleClear = () => {
-    socketRef.current?.emit("clear");
+    socket?.emit("clear");
   };
 
   return (
