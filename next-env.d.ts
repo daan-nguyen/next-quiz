@@ -10,3 +10,7 @@ type Result = {
   name: string;
   time: number;
 };
+
+type Settings = {
+  firstBuzzOnly: boolean;
+};

@@ -11,6 +11,9 @@ let port = process.env.PORT || 3000;
 
 const users = {};
 let results = [];
+let settings = {
+  firstBuzzOnly: true
+};
 
 // socket.io server
 io.on("connection", socket => {
@@ -20,18 +23,29 @@ io.on("connection", socket => {
   });
 
   socket.on("buzz", () => {
-    results.push({
-      id: socket.id,
-      name: users[socket.id],
-      time: new Date().getTime()
-    });
+    let allowPush =
+      settings.firstBuzzOnly && results.some(result => result.id === socket.id)
+        ? false
+        : true;
 
-    io.emit("update-results", results);
+    if (allowPush) {
+      results.push({
+        id: socket.id,
+        name: users[socket.id],
+        time: new Date().getTime()
+      });
+
+      io.emit("update-results", results);
+    }
   });
 
   socket.on("clear", () => {
     results = [];
     socket.broadcast.emit("update-results", results);
+  });
+
+  socket.on("update:settings", newSettings => {
+    settings = newSettings;
   });
 
   socket.on("disconnect", () => {
@@ -44,7 +58,8 @@ nextApp.prepare().then(() => {
   app.get("/state", (req, res) => {
     res.json({
       users,
-      results
+      results,
+      settings
     });
   });
 
