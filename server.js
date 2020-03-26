@@ -1,6 +1,9 @@
 const app = require("express")();
 const server = require("http").Server(app);
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+  pingTimeout: 7000,
+  pingInterval: 3000
+});
 const next = require("next");
 
 const dev = process.env.NODE_ENV !== "production";
@@ -18,7 +21,7 @@ let settings = {
 // socket.io server
 io.on("connection", socket => {
   socket.on("join-room", name => {
-    users[socket.id] = name;
+    users[socket.id] = { name, score: 0, handicap: 0 };
     io.emit("users", users);
   });
 
@@ -46,6 +49,16 @@ io.on("connection", socket => {
 
   socket.on("update:settings", newSettings => {
     settings = newSettings;
+  });
+
+  socket.on("update:score:increment", socketId => {
+    users[socketId].score++;
+    io.emit("users", users);
+  });
+
+  socket.on("update:score:decrement", socketId => {
+    users[socketId].score--;
+    io.emit("users", users);
   });
 
   socket.on("disconnect", () => {

@@ -3,8 +3,9 @@ import Container from "../components/Container";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/env";
 import fetch from "isomorphic-unfetch";
-import { Timeline } from "antd";
+import { Timeline, Card, Button } from "antd";
 import useSocket from "../utils/useSocket";
+import LeftRight from "../components/LefRight";
 
 const COLORS = ["#a0d911", "#fadb14", "#faad14"];
 
@@ -32,29 +33,45 @@ const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
 
   return (
     <Container>
-      <h2>
-        {userCount} {userCount === 1 ? "player" : "players"}
-      </h2>
-      <Timeline pending="Waiting..." style={{ width: 400, textAlign: "left" }}>
-        {results.map((result, i) => {
-          let time = 0;
-          let color = "#ffccc7";
+      <Card
+        style={{ width: 400, textAlign: "center", margin: 5 }}
+        title="The finish line"
+      >
+        <Timeline
+          pending="Waiting..."
+          style={{ width: 400, textAlign: "left" }}
+        >
+          {results.map((result, i) => {
+            let time = 0;
+            let color = "#ffccc7";
 
-          if (i > 0) {
-            time = result.time - results[0].time;
-          }
+            if (i > 0) {
+              time = result.time - results[0].time;
+            }
 
-          if (i < 3) {
-            color = COLORS[i];
-          }
+            if (i < 3) {
+              color = COLORS[i];
+            }
 
-          return (
-            <Timeline.Item key={i} color={color}>
-              <strong>{result.name}</strong> <em>+{time}ms</em>
-            </Timeline.Item>
-          );
-        })}
-      </Timeline>
+            return (
+              <Timeline.Item key={i} color={color}>
+                <strong>{result.name}</strong> <em>+{time}ms</em>
+              </Timeline.Item>
+            );
+          })}
+        </Timeline>
+      </Card>
+      <Card
+        style={{ width: 400, textAlign: "center", margin: 5 }}
+        title="Scores"
+      >
+        {Object.keys(users).map(key => (
+          <LeftRight>
+            <p>{users[key].name}</p>
+            <p>{users[key].score}</p>
+          </LeftRight>
+        ))}
+      </Card>
     </Container>
   );
 };

@@ -2,7 +2,13 @@
 /// <reference types="next/types/global" />
 
 type Users = {
-  [key: string]: string;
+  [key: string]: UserData;
+};
+
+type UserData = {
+  name: string;
+  score: number;
+  handicap: number;
 };
 
 type Result = {
