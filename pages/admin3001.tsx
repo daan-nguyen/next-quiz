@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/env";
 import useSocket from "../utils/useSocket";
 import LeftRight from "../components/LefRight";
+import { OptionType } from "antd/lib/select";
 
 const Admin: NextPage<{
   users: Users;
@@ -54,6 +55,13 @@ const Admin: NextPage<{
     socket?.emit("update:score:decrement", event.currentTarget.value);
   };
 
+  const handicapChangeHandler = (handicap: number, option: any) => {
+    socket?.emit("update:handicap", {
+      socketId: option.name,
+      handicap
+    });
+  };
+
   return (
     <Container>
       <Card
@@ -87,7 +95,7 @@ const Admin: NextPage<{
         {Object.keys(users).map(key => (
           <LeftRight key={key}>
             <p>{users[key].name}</p>
-            <p>
+            <div>
               {users[key].score}{" "}
               <Button size="small" onClick={decrementScore} value={key}>
                 -
@@ -97,17 +105,27 @@ const Admin: NextPage<{
               </Button>
               <Select
                 size="small"
-                style={{ verticalAlign: "top" }}
+                style={{ verticalAlign: "top", width: 70 }}
                 defaultValue={users[key].handicap}
+                onChange={handicapChangeHandler}
               >
-                <Select.Option value={0}>0</Select.Option>
-                <Select.Option value={5}>5</Select.Option>
-                <Select.Option value={10}>10</Select.Option>
-                <Select.Option value={20}>20</Select.Option>
-                <Select.Option value={40}>40</Select.Option>
-                <Select.Option value={80}>80</Select.Option>
+                <Select.Option value={0} name={key}>
+                  0
+                </Select.Option>
+                <Select.Option value={50} name={key}>
+                  50
+                </Select.Option>
+                <Select.Option value={100} name={key}>
+                  100
+                </Select.Option>
+                <Select.Option value={250} name={key}>
+                  250
+                </Select.Option>
+                <Select.Option value={3000} name={key}>
+                  3s
+                </Select.Option>
               </Select>
-            </p>
+            </div>
           </LeftRight>
         ))}
       </Card>

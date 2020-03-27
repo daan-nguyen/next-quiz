@@ -26,16 +26,20 @@ io.on("connection", socket => {
   });
 
   socket.on("buzz", () => {
+    // check if allow multiple
     let allowPush =
       settings.firstBuzzOnly && results.some(result => result.id === socket.id)
         ? false
         : true;
 
+    // check their connection is registered, sometimes happens if buzz page left open
+    allowPush = allowPush && users[socket.id] ? true : false;
+
     if (allowPush) {
       results.push({
         id: socket.id,
-        name: users[socket.id],
-        time: new Date().getTime()
+        name: users[socket.id].name,
+        time: new Date().getTime() + users[socket.id].handicap
       });
 
       io.emit("update-results", results);
@@ -59,6 +63,11 @@ io.on("connection", socket => {
   socket.on("update:score:decrement", socketId => {
     users[socketId].score--;
     io.emit("users", users);
+  });
+
+  socket.on("update:handicap", data => {
+    const { socketId, handicap } = data;
+    users[socketId].handicap = handicap;
   });
 
   socket.on("disconnect", () => {

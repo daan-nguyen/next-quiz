@@ -13,7 +13,7 @@ const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
   const socket = useSocket();
   const [users, setUsers] = useState<Users>({});
   const [results, setResults] = useState<Array<Result>>([]);
-  const userCount = Object.keys(users).length;
+  // const userCount = Object.keys(users).length;
 
   useEffect(() => {
     setUsers(props.users);
