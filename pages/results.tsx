@@ -9,7 +9,7 @@ import LeftRight from "../components/LefRight";
 
 const COLORS = ["#a0d911", "#fadb14", "#faad14"];
 
-const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
+const Results: NextPage<{ users: Users; results: Array<Result> }> = (props) => {
   const socket = useSocket();
   const [users, setUsers] = useState<Users>({});
   const [results, setResults] = useState<Array<Result>>([]);
@@ -65,15 +65,23 @@ const Results: NextPage<{ users: Users; results: Array<Result> }> = props => {
         style={{ width: 400, textAlign: "center", margin: 5 }}
         title="Scores"
       >
-        {Object.keys(users).map(key => (
+        {sortScores(users).map((item) => (
           <LeftRight>
-            <p>{users[key].name}</p>
-            <p>{users[key].score}</p>
+            <p>{item.name}</p>
+            <p>{item.score}</p>
           </LeftRight>
         ))}
       </Card>
     </Container>
   );
+};
+
+const sortScores = (users: Users): UserData[] => {
+  const usersArray = Object.keys(users).map((key) => users[key]);
+
+  usersArray.sort((a, b) => b.score - a.score);
+
+  return usersArray;
 };
 
 Results.getInitialProps = async ({ req }) => {
