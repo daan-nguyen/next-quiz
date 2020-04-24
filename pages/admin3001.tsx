@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import fetch from "isomorphic-unfetch";
-import { Card, Button, Switch, Tooltip, Input, Select } from "antd";
+import { Card, Button, Switch, Tooltip, Input, Select, Timeline } from "antd";
 import { InfoCircleOutlined } from "@ant-design/icons";
 import Container from "../components/Container";
 import { useEffect, useState } from "react";
@@ -9,15 +9,18 @@ import useSocket from "../utils/useSocket";
 import LeftRight from "../components/LefRight";
 import { OptionType } from "antd/lib/select";
 
+const COLORS = ["#a0d911", "#fadb14", "#faad14"];
+
 const Admin: NextPage<{
   users: Users;
   settings: Settings;
   adminPassword: boolean;
-}> = props => {
+}> = (props) => {
   const socket = useSocket();
   const [users, setUsers] = useState<Users>({});
+  const [results, setResults] = useState<Array<Result>>([]);
   const [settings, setSettings] = useState<Settings>({
-    firstBuzzOnly: true
+    firstBuzzOnly: true,
   });
 
   useEffect(() => {
@@ -27,6 +30,9 @@ const Admin: NextPage<{
 
   useEffect(() => {
     socket?.on("users", (users: Users) => setUsers(users));
+    socket?.on("update-results", (results: Array<Result>) => {
+      setResults(results);
+    });
   }, [socket]);
 
   const handleClear = () => {
@@ -36,7 +42,7 @@ const Admin: NextPage<{
   const handleFirstBuzzSetting = (checked: boolean) => {
     const newSettings: Settings = {
       ...settings,
-      firstBuzzOnly: checked
+      firstBuzzOnly: checked,
     };
 
     setSettings(newSettings);
@@ -58,7 +64,7 @@ const Admin: NextPage<{
   const handicapChangeHandler = (handicap: number, option: any) => {
     socket?.emit("update:handicap", {
       socketId: option.name,
-      handicap
+      handicap,
     });
   };
 
@@ -90,9 +96,56 @@ const Admin: NextPage<{
       </Card>
       <Card
         style={{ width: 400, textAlign: "center", margin: 5 }}
+        title="The finish line"
+      >
+        <Timeline
+          pending="Waiting..."
+          style={{ width: 400, textAlign: "left" }}
+        >
+          {results.map((result, i) => {
+            let time = 0;
+            let color = "#ffccc7";
+
+            if (i > 0) {
+              time = result.time - results[0].time;
+            }
+
+            if (i < 3) {
+              color = COLORS[i];
+            }
+
+            return (
+              <Timeline.Item key={i} color={color}>
+                <p>
+                  <strong>{result.name}</strong> <em>+{time}ms</em>
+                </p>
+                <div>
+                  {users[result.id].score}{" "}
+                  <Button
+                    size="small"
+                    onClick={decrementScore}
+                    value={result.id}
+                  >
+                    -
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={incrementScore}
+                    value={result.id}
+                  >
+                    +
+                  </Button>
+                </div>
+              </Timeline.Item>
+            );
+          })}
+        </Timeline>
+      </Card>
+      <Card
+        style={{ width: 400, textAlign: "center", margin: 5 }}
         title="Players"
       >
-        {Object.keys(users).map(key => (
+        {Object.keys(users).map((key) => (
           <LeftRight key={key}>
             <p>{users[key].name}</p>
             <div>
@@ -135,9 +188,9 @@ const Admin: NextPage<{
 
 Admin.getInitialProps = async ({ req }) => {
   const res = await fetch(`${BASE_URL}/state`);
-  const { users, settings, adminPassword } = await res.json();
+  const { users, settings, adminPassword, results } = await res.json();
 
-  return { users, settings, adminPassword };
+  return { users, settings, adminPassword, results };
 };
 
 export default Admin;
