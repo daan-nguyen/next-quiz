@@ -1,6 +1,6 @@
 import { Card, Button } from "antd";
 import useSocket from "../utils/useSocket";
-import useKeyPress from "../utils/useKeypress";
+import useKeyPress from "../utils/useKeyPress";
 
 const Buzzer: React.FC<{ socket: any }> = ({ socket }) => {
   const spacePress = useKeyPress(" ");
@@ -18,7 +18,9 @@ const Buzzer: React.FC<{ socket: any }> = ({ socket }) => {
       >
         BUZZ
       </Button>
-      <p>... or use your <strong>space bar</strong>!</p>
+      <p>
+        ... or use your <strong>space bar</strong>!
+      </p>
       {spacePress && buzzHandler()}
     </Card>
   );
