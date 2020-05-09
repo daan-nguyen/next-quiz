@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Card, Button, Input } from "antd";
 import Container from "../components/Container";
 import useSocket from "../utils/useSocket";
+import Buzzer from "../components/Buzzer";
 
 const Home: NextPage<{ messages: [] }> = ({ messages }) => {
   const socket = useSocket();
@@ -17,10 +18,6 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
     }
   };
 
-  const buzzHandler = () => {
-    socket?.emit("buzz");
-  };
-
   return (
     <Container>
       {!username ? (
@@ -33,15 +30,7 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
           />
         </Card>
       ) : (
-        <Card style={{ width: 400, textAlign: "center" }} title="Get ready...">
-          <Button
-            style={{ height: 300, width: 300, fontSize: "60px" }}
-            type="danger"
-            onClick={buzzHandler}
-          >
-            BUZZ
-          </Button>
-        </Card>
+        <Buzzer socket={socket}/>
       )}
     </Container>
   );
