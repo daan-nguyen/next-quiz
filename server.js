@@ -65,7 +65,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     delete users[socket.id];
-    io.emit("users", users);
+    io.emit("server:update:users", users);
   });
 });
 
