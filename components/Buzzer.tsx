@@ -1,16 +1,20 @@
 import { Card, Button } from "antd";
-import useSocket from "../utils/useSocket";
-import useKeyPress from "../utils/useKeyPress";
-import styled, { keyframes, css } from "styled-components";
+import styled from "styled-components";
+import { COLORS } from "../utils/colors";
 
-const StyledCard = styled(Card)<{ buzzed: boolean }>`
+const StyledCard = styled(Card)`
   width: 400px;
   text-align: center;
   transition-property: background-color;
   transition-timing-function: ease-in;
   transition-duration: 0.1s;
+`;
 
-  background-color: ${(props) => (props.buzzed ? "#ff7875" : "#ffffff")};
+const StyledButton = styled(Button)`
+  height: 100px;
+  width: 100px;
+  font-size: 40px;
+  margin: 0 5px;
 `;
 
 const StyledContainer = styled.div`
@@ -18,27 +22,53 @@ const StyledContainer = styled.div`
   width: 100%;
 `;
 
-const Buzzer: React.FC<{ socket: any }> = ({ socket }) => {
-  const spacePress = useKeyPress(" ");
-
-  const buzzHandler = () => {
-    socket?.emit("buzz");
+const Buzzer: React.FC<{ socket: any; numAnswers: number | undefined }> = ({
+  socket,
+  numAnswers,
+}) => {
+  const buzzHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const answer: string = event.currentTarget.value;
+    socket?.emit("client:answer", answer);
   };
 
   return (
-    <StyledCard title="Get ready..." buzzed={spacePress}>
+    <StyledCard title="Get ready...">
       <StyledContainer>
-        <Button
-          style={{ height: 300, width: 300, fontSize: "60px" }}
-          type="danger"
+        <StyledButton
+          type="primary"
           onClick={buzzHandler}
+          value="a"
+          style={{
+            backgroundColor: COLORS.a,
+            borderColor: COLORS.a,
+          }}
         >
-          BUZZ
-        </Button>
-        <p>
-          ... or use your <strong>space bar</strong>!
-        </p>
-        {spacePress && buzzHandler()}
+          A
+        </StyledButton>
+        <StyledButton
+          type="primary"
+          onClick={buzzHandler}
+          value="b"
+          style={{
+            backgroundColor: COLORS.b,
+            borderColor: COLORS.b,
+          }}
+        >
+          B
+        </StyledButton>
+        {numAnswers && numAnswers > 2 && (
+          <StyledButton
+            type="primary"
+            onClick={buzzHandler}
+            value="c"
+            style={{
+              backgroundColor: COLORS.c,
+              borderColor: COLORS.c,
+            }}
+          >
+            C
+          </StyledButton>
+        )}
       </StyledContainer>
     </StyledCard>
   );

@@ -1,13 +1,29 @@
 import { NextPage } from "next";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, Button, Input } from "antd";
 import Container from "../components/Container";
 import useSocket from "../utils/useSocket";
 import Buzzer from "../components/Buzzer";
+import { BASE_URL } from "../utils/env";
 
-const Home: NextPage<{ messages: [] }> = ({ messages }) => {
+const Home: NextPage<{ settings: Settings }> = (props) => {
   const socket = useSocket();
   const [username, setUsername] = useState<string>();
+  const [settings, setSettings] = useState<Settings>();
+
+  useEffect(() => {
+    setSettings(props.settings);
+  }, []);
+
+  useEffect(() => {
+    socket?.on("server:update:settings", (settings: Settings) =>
+      setSettings(settings)
+    );
+
+    return () => {
+      socket?.close();
+    };
+  }, [socket]);
 
   const joinHandler = (name: string) => {
     const cleanName = name.trim();
@@ -30,17 +46,17 @@ const Home: NextPage<{ messages: [] }> = ({ messages }) => {
           />
         </Card>
       ) : (
-        <Buzzer socket={socket}/>
+        <Buzzer socket={socket} numAnswers={settings?.numAnswers} />
       )}
     </Container>
   );
 };
 
-// Home.getInitialProps = async ({ req }) => {
-//   const res = await fetch(`${BASE_URL}/messages`);
-//   const messages = await res.json();
+Home.getInitialProps = async ({ req }) => {
+  const res = await fetch(`${BASE_URL}/state`);
+  const { settings } = await res.json();
 
-//   return { messages };
-// };
+  return { settings };
+};
 
 export default Home;

@@ -16,59 +16,51 @@ const users = {};
 let results = [];
 let settings = {
   firstBuzzOnly: true,
+  numAnswers: 2,
 };
 
 // socket.io server
 io.on("connection", (socket) => {
   socket.on("join-room", (name) => {
-    users[socket.id] = { name, score: 0, handicap: 0 };
-    io.emit("users", users);
+    users[socket.id] = {
+      name,
+      score: 0,
+      handicap: 0,
+      answer: null,
+      eliminated: false,
+    };
+    io.emit("server:update:users", users);
   });
 
-  socket.on("buzz", () => {
-    // check if allow multiple
-    let allowPush =
-      settings.firstBuzzOnly &&
-      results.some((result) => result.id === socket.id)
-        ? false
-        : true;
-
-    // check their connection is registered, sometimes happens if buzz page left open
-    allowPush = allowPush && users[socket.id] ? true : false;
-
-    if (allowPush) {
-      results.push({
-        id: socket.id,
-        name: users[socket.id].name,
-        time: new Date().getTime() + users[socket.id].handicap,
-      });
-
-      io.emit("update-results", results);
+  socket.on("client:answer", (answer) => {
+    if (users[socket.id]) {
+      users[socket.id].answer = answer;
+      io.emit("server:update:users", users);
     }
   });
 
-  socket.on("clear", () => {
-    results = [];
-    io.emit("update-results", results);
+  socket.on("admin:answer", (answer) => {
+    Object.keys(users).forEach((key) => {
+      users[key].eliminated = users[key].answer !== answer;
+      users[key].answer = null;
+    });
+
+    io.emit("server:update:users", users);
   });
 
-  socket.on("update:settings", (newSettings) => {
+  socket.on("admin:resetall", () => {
+    Object.keys(users).forEach((key) => {
+      users[key].eliminated = false;
+      users[key].answer = null;
+    });
+
+    io.emit("server:update:users", users);
+  });
+
+  socket.on("admin:settings", (newSettings) => {
     settings = newSettings;
-  });
 
-  socket.on("update:score:increment", (socketId) => {
-    users[socketId].score++;
-    io.emit("users", users);
-  });
-
-  socket.on("update:score:decrement", (socketId) => {
-    users[socketId].score--;
-    io.emit("users", users);
-  });
-
-  socket.on("update:handicap", (data) => {
-    const { socketId, handicap } = data;
-    users[socketId].handicap = handicap;
+    io.emit("server:update:settings", settings);
   });
 
   socket.on("disconnect", () => {

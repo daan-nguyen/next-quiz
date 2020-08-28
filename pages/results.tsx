@@ -6,10 +6,19 @@ import fetch from "isomorphic-unfetch";
 import { Timeline, Card, Button } from "antd";
 import useSocket from "../utils/useSocket";
 import LeftRight from "../components/LefRight";
+import { usersToArray } from "../utils/utils";
+import { COLORS } from "../utils/colors";
+import styled from "styled-components";
 
-const COLORS = ["#a0d911", "#fadb14", "#faad14"];
+const StyledLeftRight = styled(LeftRight)`
+  border-radius: 2px;
+  line-height: 20px;
+  padding: 5px 15px;
+  margin: 0 -15px;
+  margin-bottom: 3px;
+`;
 
-const Results: NextPage<{ users: Users; results: Array<Result> }> = (props) => {
+const Results: NextPage<{ users: Users }> = (props) => {
   const socket = useSocket();
   const [users, setUsers] = useState<Users>({});
   const [results, setResults] = useState<Array<Result>>([]);
@@ -17,14 +26,10 @@ const Results: NextPage<{ users: Users; results: Array<Result> }> = (props) => {
 
   useEffect(() => {
     setUsers(props.users);
-    setResults(props.results);
   }, []);
 
   useEffect(() => {
-    socket?.on("users", (users: Users) => setUsers(users));
-    socket?.on("update-results", (results: Array<Result>) => {
-      setResults(results);
-    });
+    socket?.on("server:update:users", (users: Users) => setUsers(users));
 
     return () => {
       socket?.close();
@@ -33,62 +38,41 @@ const Results: NextPage<{ users: Users; results: Array<Result> }> = (props) => {
 
   return (
     <Container>
-      <Card
-        style={{ width: 400, textAlign: "center", margin: 5 }}
-        title="The finish line"
-      >
-        <Timeline
-          pending="Waiting..."
-          style={{ width: 400, textAlign: "left" }}
-        >
-          {results.map((result, i) => {
-            let time = 0;
-            let color = "#ffccc7";
-
-            if (i > 0) {
-              time = result.time - results[0].time;
-            }
-
-            if (i < 3) {
-              color = COLORS[i];
-            }
-
-            return (
-              <Timeline.Item key={i} color={color}>
-                <strong>{result.name}</strong> <em>+{time}ms</em>
-              </Timeline.Item>
-            );
-          })}
-        </Timeline>
+      <Card style={{ width: 400, textAlign: "center", margin: 5 }} title="In">
+        {usersToArray(users)
+          .filter((user) => !user.eliminated)
+          .map((item) => (
+            <StyledLeftRight
+              style={{
+                backgroundColor: item.answer
+                  ? COLORS[item.answer]
+                  : "transparent",
+                color: item.answer ? "#fff" : "#000",
+              }}
+            >
+              <div>{item.name}</div>
+              <div>{item.answer?.toUpperCase()}</div>
+            </StyledLeftRight>
+          ))}
       </Card>
-      <Card
-        style={{ width: 400, textAlign: "center", margin: 5 }}
-        title="Scores"
-      >
-        {sortScores(users).map((item) => (
-          <LeftRight>
-            <p>{item.name}</p>
-            <p>{item.score}</p>
-          </LeftRight>
-        ))}
+      <Card style={{ width: 400, textAlign: "center", margin: 5 }} title="Out">
+        {usersToArray(users)
+          .filter((user) => user.eliminated)
+          .map((item) => (
+            <StyledLeftRight>
+              <p>{item.name}</p>
+            </StyledLeftRight>
+          ))}
       </Card>
     </Container>
   );
 };
 
-const sortScores = (users: Users): UserData[] => {
-  const usersArray = Object.keys(users).map((key) => users[key]);
-
-  usersArray.sort((a, b) => b.score - a.score);
-
-  return usersArray;
-};
-
 Results.getInitialProps = async ({ req }) => {
   const res = await fetch(`${BASE_URL}/state`);
-  const state = await res.json();
+  const { users } = await res.json();
 
-  return state;
+  return { users };
 };
 
 export default Results;
