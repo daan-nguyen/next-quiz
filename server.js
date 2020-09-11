@@ -27,7 +27,7 @@ io.on("connection", (socket) => {
       score: 0,
       handicap: 0,
       answer: null,
-      eliminated: false,
+      eliminated: true,
     };
     io.emit("server:update:users", users);
   });
