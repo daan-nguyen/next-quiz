@@ -21,7 +21,7 @@ const VerticalContainer = styled.div`
 const ButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
 `;
 
@@ -117,9 +117,11 @@ const Admin: NextPage<{
           <Button type="primary" onClick={handleAnswer} value="b">
             Answer B
           </Button>
-          <Button type="primary" onClick={handleAnswer} value="c">
-            Answer C
-          </Button>
+          {settings.numAnswers > 2 && (
+            <Button type="primary" onClick={handleAnswer} value="c">
+              Answer C
+            </Button>
+          )}
         </ButtonContainer>
         <br />
         <br />
