@@ -5,6 +5,7 @@ import Container from "../components/Container";
 import useSocket from "../utils/useSocket";
 import Buzzer from "../components/Buzzer";
 import { BASE_URL } from "../utils/env";
+import fetch from "isomorphic-unfetch";
 
 const Home: NextPage<{ settings: Settings }> = (props) => {
   const socket = useSocket();
