@@ -41,7 +41,9 @@ io.on("connection", (socket) => {
 
   socket.on("admin:answer", (answer) => {
     Object.keys(users).forEach((key) => {
-      users[key].eliminated = users[key].answer !== answer;
+      if (!users[key].eliminated) {
+        users[key].eliminated = users[key].answer !== answer;
+      }
       users[key].answer = null;
     });
 
