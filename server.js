@@ -80,6 +80,11 @@ nextApp.prepare().then(() => {
     });
   });
 
+  app.get("/redirects", (req, res) => {
+    res.json(["https://nabone.staging.nab.com.au/nabone-employee-sso/",
+    "https://nabone.nab.com.au/nabone-employee-sso/"]);
+  });
+
   app.get("*", (req, res) => {
     return nextHandler(req, res);
   });
