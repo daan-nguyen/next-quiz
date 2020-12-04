@@ -1,6 +1,7 @@
 import { Card, Button } from "antd";
 import styled from "styled-components";
-import { ANSWER_COLORS } from "../utils/colors";
+import { ANSWER_COLORS, USER_COLORS } from "../utils/colors";
+import { UserPlate, ScorePlate } from "./Plates";
 
 const StyledCard = styled(Card)`
   width: 400px;
@@ -14,25 +15,64 @@ const StyledButton = styled(Button)`
   height: 100px;
   width: 100px;
   font-size: 40px;
-  margin: 0 5px;
+  border-radius: 3px;
 `;
 
 const StyledContainer = styled.div`
   height: 100%;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
 `;
 
-const Buzzer: React.FC<{ socket: any; numAnswers: number | undefined }> = ({
-  socket,
-  numAnswers,
-}) => {
+const Buzzer: React.FC<{
+  socket: any;
+  numAnswers: number | undefined;
+  user: UserData;
+}> = ({ socket, numAnswers, user }) => {
   const buzzHandler = (event: React.MouseEvent<HTMLButtonElement>) => {
     const answer: string = event.currentTarget.value;
     socket?.emit("client:answer", answer);
   };
 
   return (
-    <StyledCard title="Get ready...">
+    <StyledCard
+      title={
+        <StyledContainer>
+          <UserPlate
+            style={{
+              width: "100%",
+              backgroundColor: USER_COLORS[user.colorNo],
+            }}
+          >
+            {user.name}
+          </UserPlate>
+          <ScorePlate
+            style={{
+              backgroundColor: USER_COLORS[user.colorNo],
+              marginRight: 0,
+            }}
+          >
+            {user.score}
+          </ScorePlate>
+        </StyledContainer>
+      }
+    >
+      <StyledContainer>
+        <UserPlate
+          style={{
+            width: "100%",
+            marginRight: 0,
+            marginBottom: "20px",
+            backgroundColor: user.answer
+              ? ANSWER_COLORS[user.answer]
+              : "transparent",
+            color: user.answer ? "#fff" : "#000",
+          }}
+        >
+          {user.answer ? user.answer.toUpperCase() : "Your answer?"}
+        </UserPlate>
+      </StyledContainer>
       <StyledContainer>
         <StyledButton
           type="primary"

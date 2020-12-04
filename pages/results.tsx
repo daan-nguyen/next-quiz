@@ -1,13 +1,14 @@
-import { NextPage } from "next";
-import Container from "../components/Container";
-import { useEffect, useState } from "react";
-import { BASE_URL } from "../utils/env";
+import ConfettiGenerator from "confetti-js";
 import fetch from "isomorphic-unfetch";
+import { NextPage } from "next";
+import { useEffect, useState } from "react";
+import styled from "styled-components";
+import Container from "../components/Container";
+import { ANSWER_COLORS, USER_COLORS } from "../utils/colors";
+import { BASE_URL } from "../utils/env";
 import useSocket from "../utils/useSocket";
 import { usersToArray } from "../utils/utils";
-import { ANSWER_COLORS, USER_COLORS } from "../utils/colors";
-import styled from "styled-components";
-import ConfettiGenerator from "confetti-js";
+import { BasePlate, UserPlate, ScorePlate } from '../components/Plates';
 
 const ResultContainer = styled(Container)`
   flex-direction: column;
@@ -16,38 +17,6 @@ const ResultContainer = styled(Container)`
 const UserLine = styled.div`
   display: flex;
   flex-direction: row;
-`;
-
-const UserPlate = styled.div`
-  width: 150px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-
-  color: #fff;
-  border-radius: 2px;
-  line-height: 20px;
-  padding: 5px 15px;
-  margin-bottom: 3px;
-  margin-right: 3px;
-  background: red;
-`;
-
-const ScorePlate = styled.div`
-  width: 40px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-align: center;
-  transition: width 1s;
-
-  color: #fff;
-  border-radius: 2px;
-  line-height: 20px;
-  padding: 5px 15px;
-  margin-bottom: 3px;
-  margin-right: 3px;
-  background: red;
 `;
 
 const Results: NextPage<{ users: Users }> = (props) => {
@@ -63,23 +32,15 @@ const Results: NextPage<{ users: Users }> = (props) => {
   useEffect(() => {
     socket?.on("server:update:users", (users: Users) => setUsers(users));
     socket?.on("server:confetti", () => {
-      const confettiSettings = { target: 'my-canvas', max: 500 };
+      const confettiSettings = { target: "confetti", max: 500 };
       const confetti = new ConfettiGenerator(confettiSettings);
       confetti.render();
-    })
+    });
 
     return () => {
       socket?.close();
     };
   }, [socket]);
-
-  // useEffect(() => {
-  //   const confettiSettings = { target: 'my-canvas', max: 500 };
-  //   const confetti = new ConfettiGenerator(confettiSettings);
-  //   confetti.render();
-  
-  //   return () => confetti.clear();
-  // }, [])
 
   return (
     <ResultContainer>
@@ -87,20 +48,18 @@ const Results: NextPage<{ users: Users }> = (props) => {
         // .filter((user) => !user.eliminated)
         .map((item) => (
           <UserLine key={item.name}>
-            <UserPlate style={{ backgroundColor: USER_COLORS[item.colorNo] }}>
-              {item.name}
-            </UserPlate>
             <ScorePlate
               style={{
                 width: (80 / 20) * item.score + "%",
-                minWidth: "40px",
-                textAlign: "right",
                 backgroundColor: USER_COLORS[item.colorNo],
               }}
             >
               {item.score}
             </ScorePlate>
-            <ScorePlate
+            <UserPlate style={{ backgroundColor: USER_COLORS[item.colorNo] }}>
+              {item.name}
+            </UserPlate>
+            <BasePlate
               style={{
                 backgroundColor: item.answer
                   ? ANSWER_COLORS[item.answer]
@@ -109,7 +68,7 @@ const Results: NextPage<{ users: Users }> = (props) => {
               }}
             >
               {item.answer?.toUpperCase()}
-            </ScorePlate>
+            </BasePlate>
           </UserLine>
         ))}
     </ResultContainer>

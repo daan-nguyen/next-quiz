@@ -10,7 +10,8 @@ import ConfettiGenerator from "confetti-js";
 
 const Home: NextPage<{ settings: Settings }> = (props) => {
   const socket = useSocket();
-  const [username, setUsername] = useState<string>();
+  // const [username, setUsername] = useState<string>();
+  const [user, setUser] = useState<UserData>();
   const [settings, setSettings] = useState<Settings>();
 
   useEffect(() => {
@@ -21,10 +22,10 @@ const Home: NextPage<{ settings: Settings }> = (props) => {
     socket?.on("server:update:settings", (settings: Settings) =>
       setSettings(settings)
     );
-
+    socket?.on("server:update:users", (users: Users) => setUser(users[socket.id]));
     socket?.on("server:confetti", (id: string) => {
       if (id === socket.id) {
-        const confettiSettings = { target: "my-canvas", max: 500 };
+        const confettiSettings = { target: "confetti", max: 500 };
         const confetti = new ConfettiGenerator(confettiSettings);
         confetti.render();
       }
@@ -40,13 +41,12 @@ const Home: NextPage<{ settings: Settings }> = (props) => {
 
     if (cleanName && socket) {
       socket.emit("join-room", cleanName);
-      setUsername(cleanName);
     }
   };
 
   return (
     <Container>
-      {!username ? (
+      {!user ? (
         <Card style={{ width: 400 }} title="What's your name?">
           <Input.Search
             placeholder="Name"
@@ -56,7 +56,7 @@ const Home: NextPage<{ settings: Settings }> = (props) => {
           />
         </Card>
       ) : (
-        <Buzzer socket={socket} numAnswers={settings?.numAnswers} />
+        <Buzzer socket={socket} numAnswers={settings?.numAnswers} user={user}/>
       )}
     </Container>
   );
