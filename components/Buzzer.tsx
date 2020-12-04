@@ -1,6 +1,6 @@
 import { Card, Button } from "antd";
 import styled from "styled-components";
-import { COLORS } from "../utils/colors";
+import { ANSWER_COLORS } from "../utils/colors";
 
 const StyledCard = styled(Card)`
   width: 400px;
@@ -39,8 +39,8 @@ const Buzzer: React.FC<{ socket: any; numAnswers: number | undefined }> = ({
           onClick={buzzHandler}
           value="a"
           style={{
-            backgroundColor: COLORS.a,
-            borderColor: COLORS.a,
+            backgroundColor: ANSWER_COLORS.a,
+            borderColor: ANSWER_COLORS.a,
           }}
         >
           A
@@ -50,8 +50,8 @@ const Buzzer: React.FC<{ socket: any; numAnswers: number | undefined }> = ({
           onClick={buzzHandler}
           value="b"
           style={{
-            backgroundColor: COLORS.b,
-            borderColor: COLORS.b,
+            backgroundColor: ANSWER_COLORS.b,
+            borderColor: ANSWER_COLORS.b,
           }}
         >
           B
@@ -62,8 +62,8 @@ const Buzzer: React.FC<{ socket: any; numAnswers: number | undefined }> = ({
             onClick={buzzHandler}
             value="c"
             style={{
-              backgroundColor: COLORS.c,
-              borderColor: COLORS.c,
+              backgroundColor: ANSWER_COLORS.c,
+              borderColor: ANSWER_COLORS.c,
             }}
           >
             C

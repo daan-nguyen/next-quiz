@@ -3,19 +3,51 @@ import Container from "../components/Container";
 import { useEffect, useState } from "react";
 import { BASE_URL } from "../utils/env";
 import fetch from "isomorphic-unfetch";
-import { Timeline, Card, Button } from "antd";
 import useSocket from "../utils/useSocket";
-import LeftRight from "../components/LefRight";
 import { usersToArray } from "../utils/utils";
-import { COLORS } from "../utils/colors";
+import { ANSWER_COLORS, USER_COLORS } from "../utils/colors";
 import styled from "styled-components";
+import ConfettiGenerator from "confetti-js";
 
-const StyledLeftRight = styled(LeftRight)`
+const ResultContainer = styled(Container)`
+  flex-direction: column;
+`;
+
+const UserLine = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const UserPlate = styled.div`
+  width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  color: #fff;
   border-radius: 2px;
   line-height: 20px;
   padding: 5px 15px;
-  margin: 0 -15px;
   margin-bottom: 3px;
+  margin-right: 3px;
+  background: red;
+`;
+
+const ScorePlate = styled.div`
+  width: 40px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: center;
+  transition: width 1s;
+
+  color: #fff;
+  border-radius: 2px;
+  line-height: 20px;
+  padding: 5px 15px;
+  margin-bottom: 3px;
+  margin-right: 3px;
+  background: red;
 `;
 
 const Results: NextPage<{ users: Users }> = (props) => {
@@ -30,41 +62,57 @@ const Results: NextPage<{ users: Users }> = (props) => {
 
   useEffect(() => {
     socket?.on("server:update:users", (users: Users) => setUsers(users));
+    socket?.on("server:confetti", () => {
+      const confettiSettings = { target: 'my-canvas', max: 500 };
+      const confetti = new ConfettiGenerator(confettiSettings);
+      confetti.render();
+    })
 
     return () => {
       socket?.close();
     };
   }, [socket]);
 
+  // useEffect(() => {
+  //   const confettiSettings = { target: 'my-canvas', max: 500 };
+  //   const confetti = new ConfettiGenerator(confettiSettings);
+  //   confetti.render();
+  
+  //   return () => confetti.clear();
+  // }, [])
+
   return (
-    <Container>
-      <Card style={{ width: 400, textAlign: "center", margin: 5 }} title="In">
-        {usersToArray(users)
-          .filter((user) => !user.eliminated)
-          .map((item) => (
-            <StyledLeftRight
+    <ResultContainer>
+      {usersToArray(users)
+        // .filter((user) => !user.eliminated)
+        .map((item) => (
+          <UserLine key={item.name}>
+            <UserPlate style={{ backgroundColor: USER_COLORS[item.colorNo] }}>
+              {item.name}
+            </UserPlate>
+            <ScorePlate
+              style={{
+                width: (80 / 20) * item.score + "%",
+                minWidth: "40px",
+                textAlign: "right",
+                backgroundColor: USER_COLORS[item.colorNo],
+              }}
+            >
+              {item.score}
+            </ScorePlate>
+            <ScorePlate
               style={{
                 backgroundColor: item.answer
-                  ? COLORS[item.answer]
+                  ? ANSWER_COLORS[item.answer]
                   : "transparent",
                 color: item.answer ? "#fff" : "#000",
               }}
             >
-              <div>{item.name}</div>
-              <div>{item.answer?.toUpperCase()}</div>
-            </StyledLeftRight>
-          ))}
-      </Card>
-      <Card style={{ width: 400, textAlign: "center", margin: 5 }} title="Out">
-        {usersToArray(users)
-          .filter((user) => user.eliminated)
-          .map((item) => (
-            <StyledLeftRight>
-              <p>{item.name}</p>
-            </StyledLeftRight>
-          ))}
-      </Card>
-    </Container>
+              {item.answer?.toUpperCase()}
+            </ScorePlate>
+          </UserLine>
+        ))}
+    </ResultContainer>
   );
 };
 

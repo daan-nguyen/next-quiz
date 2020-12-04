@@ -59,6 +59,10 @@ const Admin: NextPage<{
     socket?.emit("admin:resetall");
   };
 
+  const handleConfetti = () => {
+    socket?.emit("admin:confetti");
+  }
+
   const handleFirstBuzzSetting = (checked: boolean) => {
     const newSettings: Settings = {
       ...settings,
@@ -123,6 +127,10 @@ const Admin: NextPage<{
             </Button>
           )}
         </ButtonContainer>
+        <br />
+        <Button block type="danger" onClick={handleConfetti}>
+          CONFETTI
+        </Button>
         <br />
         <br />
         <br />

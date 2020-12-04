@@ -17,6 +17,9 @@ type UserData = {
   answer: Answers | null;
   eliminated: boolean;
   handicap: number;
+  answeredTime: number | null;
+  id: string;
+  colorNo: number;
 };
 
 type Result = {
@@ -30,3 +33,5 @@ type Settings = {
   firstBuzzOnly: boolean;
   numAnswers: number;
 };
+
+module "confetti-js";

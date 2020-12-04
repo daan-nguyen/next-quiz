@@ -6,6 +6,7 @@ import useSocket from "../utils/useSocket";
 import Buzzer from "../components/Buzzer";
 import { BASE_URL } from "../utils/env";
 import fetch from "isomorphic-unfetch";
+import ConfettiGenerator from "confetti-js";
 
 const Home: NextPage<{ settings: Settings }> = (props) => {
   const socket = useSocket();
@@ -20,6 +21,14 @@ const Home: NextPage<{ settings: Settings }> = (props) => {
     socket?.on("server:update:settings", (settings: Settings) =>
       setSettings(settings)
     );
+
+    socket?.on("server:confetti", (id: string) => {
+      if (id === socket.id) {
+        const confettiSettings = { target: "my-canvas", max: 500 };
+        const confetti = new ConfettiGenerator(confettiSettings);
+        confetti.render();
+      }
+    });
 
     return () => {
       socket?.close();
